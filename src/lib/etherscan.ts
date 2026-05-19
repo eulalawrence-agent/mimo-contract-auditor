@@ -1,11 +1,11 @@
-const CHAINS: Record<string, { api: string; name: string; explorer: string }> = {
-  ethereum: { api: 'https://api.etherscan.io/api', name: 'Ethereum', explorer: 'etherscan.io' },
-  bsc: { api: 'https://api.bscscan.com/api', name: 'BSC', explorer: 'bscscan.com' },
-  polygon: { api: 'https://api.polygonscan.com/api', name: 'Polygon', explorer: 'polygonscan.com' },
-  arbitrum: { api: 'https://api.arbiscan.io/api', name: 'Arbitrum', explorer: 'arbiscan.io' },
-  optimism: { api: 'https://api-optimistic.etherscan.io/api', name: 'Optimism', explorer: 'optimistic.etherscan.io' },
-  base: { api: 'https://api.basescan.org/api', name: 'Base', explorer: 'basescan.org' },
-  avalanche: { api: 'https://api.snowtrace.io/api', name: 'Avalanche', explorer: 'snowtrace.io' },
+const CHAINS: Record<string, { chainid: string; name: string; explorer: string }> = {
+  ethereum: { chainid: '1', name: 'Ethereum', explorer: 'etherscan.io' },
+  bsc: { chainid: '56', name: 'BSC', explorer: 'bscscan.com' },
+  polygon: { chainid: '137', name: 'Polygon', explorer: 'polygonscan.com' },
+  arbitrum: { chainid: '42161', name: 'Arbitrum', explorer: 'arbiscan.io' },
+  optimism: { chainid: '10', name: 'Optimism', explorer: 'optimistic.etherscan.io' },
+  base: { chainid: '8453', name: 'Base', explorer: 'basescan.org' },
+  avalanche: { chainid: '43114', name: 'Avalanche', explorer: 'snowtrace.io' },
 }
 
 export interface ContractSource {
@@ -27,8 +27,13 @@ export async function fetchContractSource(
     throw new Error('Unsupported chain: ' + chain)
   }
 
-  const apiKey = process.env.ETHERSCAN_API_KEY || ''
-  const url = chainConfig.api + '?module=contract&action=getsourcecode&address=' + address + '&apikey=' + apiKey
+  const apiKey = process.env.ETHERSCAN_API_KEY
+  if (!apiKey) {
+    throw new Error('ETHERSCAN_API_KEY not configured')
+  }
+
+  const url = 'https://api.etherscan.io/v2/api?chainid=' + chainConfig.chainid +
+    '&module=contract&action=getsourcecode&address=' + address + '&apikey=' + apiKey
 
   const response = await fetch(url, {
     headers: { 'User-Agent': 'MiMo-Auditor/1.0' },
@@ -42,7 +47,8 @@ export async function fetchContractSource(
   const data = await response.json()
 
   if (data.status === '0' || !data.result || !data.result[0]) {
-    throw new Error(data.message || 'Contract not found or not verified')
+    const errMsg = typeof data.result === 'string' ? data.result : data.message
+    throw new Error(errMsg || 'Contract not found or not verified')
   }
 
   const result = data.result[0]
@@ -58,18 +64,14 @@ export async function fetchContractSource(
       sourceCode = Object.entries(parsed.sources || parsed)
         .map(([file, content]: [string, any]) => '// File: ' + file + '\n' + content.content)
         .join('\n\n')
-    } catch {
-      // Keep as-is
-    }
+    } catch {}
   } else if (sourceCode.startsWith('{')) {
     try {
       const parsed = JSON.parse(sourceCode)
       sourceCode = Object.entries(parsed.sources || parsed)
         .map(([file, content]: [string, any]) => '// File: ' + file + '\n' + (typeof content === 'string' ? content : content.content))
         .join('\n\n')
-    } catch {
-      // Keep as-is
-    }
+    } catch {}
   }
 
   return {
