@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from 'react'
+import { useState, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import LoadingState from '@/components/LoadingState'
 
@@ -25,8 +25,49 @@ export default function Home() {
   const [address, setAddress] = useState('')
   const [chain, setChain] = useState('ethereum')
   const [loading, setLoading] = useState(false)
+  const [detecting, setDetecting] = useState(false)
   const [error, setError] = useState('')
   const [step, setStep] = useState('')
+  const detectTimeout = useRef<NodeJS.Timeout | null>(null)
+
+  const detectChain = useCallback(async (addr: string) => {
+    if (!/^0x[a-fA-F0-9]{40}$/.test(addr)) return
+
+    setDetecting(true)
+    setError('')
+
+    try {
+      const res = await fetch('/api/detect', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ address: addr }),
+      })
+
+      const data = await res.json()
+
+      if (data.chain) {
+        setChain(data.chain)
+        setError('')
+      } else {
+        setError(data.message || 'No verified contract found')
+      }
+    } catch {
+      // Silent fail on detect
+    } finally {
+      setDetecting(false)
+    }
+  }, [])
+
+  const handleAddressChange = (val: string) => {
+    setAddress(val)
+    setError('')
+
+    // Auto-detect when a full address is pasted
+    if (detectTimeout.current) clearTimeout(detectTimeout.current)
+    if (/^0x[a-fA-F0-9]{40}$/.test(val.trim())) {
+      detectTimeout.current = setTimeout(() => detectChain(val.trim()), 300)
+    }
+  }
 
   const handleAnalyze = async () => {
     if (!address.trim()) {
@@ -58,7 +99,6 @@ export default function Home() {
         throw new Error(data.error || 'Analysis failed')
       }
 
-      // Store report in localStorage
       const reportId = data.reportId
       try {
         localStorage.setItem('mimo_report_' + reportId, JSON.stringify(data.report))
@@ -100,7 +140,12 @@ export default function Home() {
       <div className="max-w-2xl mx-auto animate-in stagger-1 opacity-0">
         <div className="glass-card p-6 sm:p-8">
           <div className="mb-5">
-            <label className="block text-sm font-medium text-dark-300 mb-2.5">Blockchain Network</label>
+            <label className="block text-sm font-medium text-dark-300 mb-2.5">
+              Blockchain Network
+              {detecting && (
+                <span className="ml-2 text-mimo-400 text-xs animate-pulse">Detecting...</span>
+              )}
+            </label>
             <div className="flex flex-wrap gap-2">
               {CHAINS.map(c => (
                 <button
@@ -123,8 +168,8 @@ export default function Home() {
             <input
               type="text"
               value={address}
-              onChange={e => { setAddress(e.target.value); setError('') }}
-              placeholder="0x..."
+              onChange={e => handleAddressChange(e.target.value)}
+              placeholder="Paste contract address (0x...) - chain auto-detects"
               className="input-field"
               onKeyDown={e => e.key === 'Enter' && handleAnalyze()}
             />
