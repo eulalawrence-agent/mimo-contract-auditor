@@ -61,7 +61,7 @@ export default function Home() {
 
       setStep('Report generated!')
       await new Promise(r => setTimeout(r, 500))
-      router.push(\`/report/\${data.reportId}\`)
+      router.push(`/report/${data.reportId}`)
     } catch (err: any) {
       setError(err.message)
       setLoading(false)
@@ -104,11 +104,11 @@ export default function Home() {
                 <button
                   key={c.id}
                   onClick={() => setChain(c.id)}
-                  className={\`px-3.5 py-2 rounded-lg text-sm font-medium transition-all \${
+                  className={`px-3.5 py-2 rounded-lg text-sm font-medium transition-all ${
                     chain === c.id
                       ? 'bg-mimo-500/20 text-mimo-300 border border-mimo-500/30'
                       : 'bg-dark-800/50 text-dark-400 border border-dark-700/50 hover:border-dark-600'
-                  }\`}
+                  }`}
                 >
                   <span className="mr-1.5">{c.icon}</span>
                   {c.name}

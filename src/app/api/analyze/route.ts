@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
     // Validate chain
     if (!getSupportedChains().includes(chain)) {
       return NextResponse.json(
-        { error: \`Unsupported chain: \${chain}. Supported: \${getSupportedChains().join(', ')}\` },
+        { error: `Unsupported chain: ${chain}. Supported: ${getSupportedChains().join(', ')}` },
         { status: 400 }
       )
     }

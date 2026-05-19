@@ -25,7 +25,7 @@ export default function LoadingState({ step }: { step: string }) {
           <div
             key={i}
             className="w-2 h-2 rounded-full bg-mimo-500 animate-bounce"
-            style={{ animationDelay: \`\${i * 0.15}s\` }}
+            style={{ animationDelay: `${i * 0.15}s` }}
           />
         ))}
       </div>

@@ -19,12 +19,12 @@ export default function CategoryBar({ name, value }: { name: string; value: numb
       <div className="flex-1">
         <div className="flex justify-between mb-1.5">
           <span className="text-sm text-dark-300">{info.label}</span>
-          <span className={\`text-sm font-semibold \${textColor}\`}>{value}/10</span>
+          <span className={`text-sm font-semibold ${textColor}`}>{value}/10</span>
         </div>
         <div className="h-2 bg-dark-700 rounded-full overflow-hidden">
           <div
-            className={\`h-full rounded-full \${color} transition-all duration-1000 ease-out\`}
-            style={{ width: \`\${pct}%\` }}
+            className={`h-full rounded-full ${color} transition-all duration-1000 ease-out`}
+            style={{ width: `${pct}%` }}
           />
         </div>
       </div>

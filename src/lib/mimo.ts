@@ -33,7 +33,7 @@ function getClient() {
   })
 }
 
-const SYSTEM_PROMPT = \`You are MiMo Contract Auditor, an expert smart contract security analyst developed by Xiaomi.
+const SYSTEM_PROMPT = `You are MiMo Contract Auditor, an expert smart contract security analyst developed by Xiaomi.
 
 Your job is to analyze Solidity smart contracts for security vulnerabilities, code quality issues, and potential risks.
 
@@ -76,7 +76,7 @@ You MUST respond with valid JSON only, no markdown fences. Structure:
 }
 
 Be thorough but practical. Flag real issues, not theoretical concerns. If the contract is simple and safe, say so.
-\`
+`
 
 export async function analyzeContract(
   sourceCode: string,
@@ -92,17 +92,17 @@ export async function analyzeContract(
     ? sourceCode.slice(0, maxLen) + '\n\n// ... [TRUNCATED - showing first ' + maxLen + ' chars]'
     : sourceCode
 
-  const userMessage = \`Analyze this smart contract for security vulnerabilities.
+  const userMessage = `Analyze this smart contract for security vulnerabilities.
 
-Contract: \${contractName}
-Chain: \${chain}
+Contract: ${contractName}
+Chain: ${chain}
 Compiler: Solidity
 
-\`\`\`solidity
-\${truncated}
-\`\`\`
+```solidity
+${truncated}
+```
 
-Provide a complete security audit in JSON format.\`
+Provide a complete security audit in JSON format.`
 
   try {
     const completion = await client.chat.completions.create({
@@ -126,7 +126,7 @@ Provide a complete security audit in JSON format.\`
       riskLevel: parsed.riskLevel || 'medium',
       summary: parsed.summary || 'Analysis completed.',
       findings: (parsed.findings || []).map((f: any, i: number) => ({
-        id: f.id || \`F-\${String(i + 1).padStart(3, '0')}\`,
+        id: f.id || `F-${String(i + 1).padStart(3, '0')}`,
         severity: f.severity || 'info',
         title: f.title || 'Finding',
         description: f.description || '',
@@ -220,7 +220,7 @@ function fallbackAnalysis(sourceCode: string, contractName: string, model: strin
   return {
     score: Math.max(0, score),
     riskLevel,
-    summary: \`Fallback analysis of \${contractName}. \${findings.length} potential issues found. For comprehensive analysis, configure the MiMo API key.\`,
+    summary: `Fallback analysis of ${contractName}. ${findings.length} potential issues found. For comprehensive analysis, configure the MiMo API key.`,
     findings,
     categories: {
       reentrancy: sourceCode.includes('.call{value:') ? 7 : 2,

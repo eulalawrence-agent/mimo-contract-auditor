@@ -36,7 +36,7 @@ export default function ReportPage() {
   useEffect(() => {
     const fetchReport = async () => {
       try {
-        const res = await fetch(\`/api/report/\${params.id}\`)
+        const res = await fetch(`/api/report/${params.id}`)
         if (!res.ok) throw new Error('Report not found')
         const data = await res.json()
         setReport(data)
@@ -121,7 +121,7 @@ export default function ReportPage() {
         <div className="glass-card p-8 flex flex-col items-center justify-center lg:col-span-1">
           <h2 className="text-sm font-medium text-dark-400 mb-4 uppercase tracking-wider">Safety Score</h2>
           <ScoreRing score={audit.score} />
-          <div className={\`mt-4 text-lg font-bold uppercase \${riskColor[audit.riskLevel] || 'text-dark-300'}\`}>
+          <div className={`mt-4 text-lg font-bold uppercase ${riskColor[audit.riskLevel] || 'text-dark-300'}`}>
             {audit.riskLevel} Risk
           </div>
         </div>
@@ -135,7 +135,7 @@ export default function ReportPage() {
 
           <div>
             <h2 className="text-sm font-medium text-dark-400 uppercase tracking-wider mb-3">AI Recommendation</h2>
-            <div className={\`border rounded-xl p-4 \${recommendationColor[audit.recommendation] || 'border-dark-600 bg-dark-800/50 text-dark-200'}\`}>
+            <div className={`border rounded-xl p-4 ${recommendationColor[audit.recommendation] || 'border-dark-600 bg-dark-800/50 text-dark-200'}`}>
               <span className="font-bold text-lg">{audit.recommendation}</span>
             </div>
           </div>
@@ -147,7 +147,7 @@ export default function ReportPage() {
                 const count = severityCounts[sev] || 0
                 if (count === 0) return null
                 return (
-                  <span key={sev} className={\`badge-\${sev === 'info' ? 'safe' : sev}\`}>
+                  <span key={sev} className={`badge-${sev === 'info' ? 'safe' : sev}`}>
                     {count} {sev}
                   </span>
                 )
@@ -189,7 +189,7 @@ export default function ReportPage() {
         <span>Model: {audit.modelUsed}</span>
         <span>Chain: {contract.chain} ({contract.explorer})</span>
         <a
-          href={\`https://\${contract.explorer}/address/\${contract.address}\`}
+          href={`https://${contract.explorer}/address/${contract.address}`}
           target="_blank"
           rel="noopener noreferrer"
           className="text-mimo-400 hover:text-mimo-300 transition-colors"

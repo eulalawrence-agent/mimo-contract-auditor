@@ -11,7 +11,7 @@ interface Finding {
 
 export default function FindingCard({ finding, index }: { finding: Finding; index: number }) {
   return (
-    <div className="glass-card p-5 animate-in opacity-0" style={{ animationDelay: \`\${index * 0.1}s\` }}>
+    <div className="glass-card p-5 animate-in opacity-0" style={{ animationDelay: `${index * 0.1}s` }}>
       <div className="flex items-start justify-between gap-3 mb-3">
         <div className="flex items-center gap-3">
           <span className="text-dark-500 text-sm font-mono">{finding.id}</span>
