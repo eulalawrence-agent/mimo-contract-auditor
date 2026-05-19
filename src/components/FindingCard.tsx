@@ -29,7 +29,7 @@ export default function FindingCard({ finding, index }: { finding: Finding; inde
       )}
       
       <div className="flex items-start gap-2">
-        <span className="text-mimo-400 text-sm mt-0.5">💡</span>
+        <span className="text-mimo-400 text-sm mt-0.5">Tip:</span>
         <p className="text-dark-400 text-sm">{finding.recommendation}</p>
       </div>
     </div>

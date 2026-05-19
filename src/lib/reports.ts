@@ -1,6 +1,3 @@
-// In-memory report storage (fine for demo/serverless)
-// Each cold start resets — for production, use Vercel KV or a DB
-
 const reports = new Map<string, StoredReport>()
 
 export interface StoredReport {

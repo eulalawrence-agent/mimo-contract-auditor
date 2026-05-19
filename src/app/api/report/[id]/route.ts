@@ -10,7 +10,7 @@ export async function GET(
 
   if (!report) {
     return NextResponse.json(
-      { error: 'Report not found. Reports are temporary and may expire.' },
+      { error: 'Report not found.' },
       { status: 404 }
     )
   }

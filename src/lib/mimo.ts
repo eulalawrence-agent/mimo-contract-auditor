@@ -41,7 +41,7 @@ ANALYSIS FRAMEWORK:
 1. Reentrancy Attacks (reentrancy, cross-function reentrancy, cross-contract reentrancy)
 2. Access Control (missing modifiers, unprotected functions, tx.origin usage)
 3. Arithmetic Issues (overflow/underflow, division by zero, unchecked returns)
-4. Front-running & MEV (predictable randomness, transaction ordering dependence)
+4. Front-running and MEV (predictable randomness, transaction ordering dependence)
 5. Centralization Risks (owner privileges, pause mechanisms, upgrade patterns)
 6. Gas Optimization (storage vs memory, loop optimizations, redundant operations)
 7. Rug Pull Patterns (hidden mints, blacklist functions, hidden fees, proxy traps)
@@ -72,11 +72,10 @@ You MUST respond with valid JSON only, no markdown fences. Structure:
     "centralization": <0-10 risk score>,
     "gasOptimization": <0-10 risk score>
   },
-  "recommendation": "<overall recommendation: DEPLOY WITH CAUTION / DO NOT DEPLOY / SAFE TO DEPLOY / NEEDS REVIEW>"
+  "recommendation": "<DEPLOY WITH CAUTION | DO NOT DEPLOY | SAFE TO DEPLOY | NEEDS REVIEW>"
 }
 
-Be thorough but practical. Flag real issues, not theoretical concerns. If the contract is simple and safe, say so.
-`
+Be thorough but practical. Flag real issues, not theoretical concerns.`
 
 export async function analyzeContract(
   sourceCode: string,
@@ -86,23 +85,16 @@ export async function analyzeContract(
   const client = getClient()
   const model = process.env.MIMO_MODEL || 'xiaomi/mimo-v2.5-pro'
 
-  // Truncate if too long (serverless timeout concerns)
   const maxLen = 80000
   const truncated = sourceCode.length > maxLen
-    ? sourceCode.slice(0, maxLen) + '\n\n// ... [TRUNCATED - showing first ' + maxLen + ' chars]'
+    ? sourceCode.slice(0, maxLen) + '\n\n// ... [TRUNCATED]'
     : sourceCode
 
-  const userMessage = `Analyze this smart contract for security vulnerabilities.
-
-Contract: ${contractName}
-Chain: ${chain}
-Compiler: Solidity
-
-```solidity
-${truncated}
-```
-
-Provide a complete security audit in JSON format.`
+  const userMessage = 'Analyze this smart contract for security vulnerabilities.\n\n' +
+    'Contract: ' + contractName + '\n' +
+    'Chain: ' + chain + '\n\n' +
+    '```solidity\n' + truncated + '\n```\n\n' +
+    'Provide a complete security audit in JSON format.'
 
   try {
     const completion = await client.chat.completions.create({
@@ -126,7 +118,7 @@ Provide a complete security audit in JSON format.`
       riskLevel: parsed.riskLevel || 'medium',
       summary: parsed.summary || 'Analysis completed.',
       findings: (parsed.findings || []).map((f: any, i: number) => ({
-        id: f.id || `F-${String(i + 1).padStart(3, '0')}`,
+        id: f.id || 'F-' + String(i + 1).padStart(3, '0'),
         severity: f.severity || 'info',
         title: f.title || 'Finding',
         description: f.description || '',
@@ -145,7 +137,6 @@ Provide a complete security audit in JSON format.`
       modelUsed: model,
     }
   } catch (error: any) {
-    // Fallback with basic pattern matching if API fails
     console.error('MiMo API error:', error.message)
     return fallbackAnalysis(sourceCode, contractName, model)
   }
@@ -155,13 +146,12 @@ function fallbackAnalysis(sourceCode: string, contractName: string, model: strin
   const findings: Finding[] = []
   let score = 85
 
-  // Basic pattern matching as fallback
   if (sourceCode.includes('selfdestruct') || sourceCode.includes('suicide')) {
     findings.push({
       id: 'F-001', severity: 'high',
       title: 'Self-destruct Detected',
-      description: 'Contract contains selfdestruct which can permanently destroy the contract and send remaining ETH to an arbitrary address.',
-      recommendation: 'Remove selfdestruct unless absolutely necessary for upgradeability.',
+      description: 'Contract contains selfdestruct which can permanently destroy the contract.',
+      recommendation: 'Remove selfdestruct unless absolutely necessary.',
     })
     score -= 15
   }
@@ -171,7 +161,7 @@ function fallbackAnalysis(sourceCode: string, contractName: string, model: strin
       id: 'F-002', severity: 'medium',
       title: 'tx.origin Usage',
       description: 'Using tx.origin for authorization is vulnerable to phishing attacks.',
-      recommendation: 'Use msg.sender instead of tx.origin for authentication.',
+      recommendation: 'Use msg.sender instead of tx.origin.',
     })
     score -= 10
   }
@@ -186,32 +176,12 @@ function fallbackAnalysis(sourceCode: string, contractName: string, model: strin
     score -= 15
   }
 
-  if (sourceCode.includes('mint') && !sourceCode.includes('maxSupply') && !sourceCode.includes('cap')) {
-    findings.push({
-      id: 'F-004', severity: 'medium',
-      title: 'Unlimited Minting',
-      description: 'Mint function found without supply cap. Could be used for inflation attack.',
-      recommendation: 'Add a maximum supply cap or make minting governance-controlled.',
-    })
-    score -= 10
-  }
-
-  if (sourceCode.includes('blacklist') || sourceCode.includes('isBlacklisted')) {
-    findings.push({
-      id: 'F-005', severity: 'medium',
-      title: 'Blacklist Functionality',
-      description: 'Contract has blacklist capability which can freeze user funds.',
-      recommendation: 'Ensure blacklist has governance oversight and timelock.',
-    })
-    score -= 5
-  }
-
   if (findings.length === 0) {
     findings.push({
       id: 'F-001', severity: 'info',
       title: 'Basic Pattern Analysis',
-      description: 'Automated fallback analysis found no obvious vulnerabilities. Note: This is a basic check only — a full MiMo AI audit is recommended.',
-      recommendation: 'Configure OPENROUTER_API_KEY for full AI-powered analysis.',
+      description: 'Fallback analysis found no obvious vulnerabilities. Configure OPENROUTER_API_KEY for full AI analysis.',
+      recommendation: 'Configure OPENROUTER_API_KEY for full analysis.',
     })
   }
 
@@ -220,7 +190,7 @@ function fallbackAnalysis(sourceCode: string, contractName: string, model: strin
   return {
     score: Math.max(0, score),
     riskLevel,
-    summary: `Fallback analysis of ${contractName}. ${findings.length} potential issues found. For comprehensive analysis, configure the MiMo API key.`,
+    summary: 'Fallback analysis of ' + contractName + '. ' + findings.length + ' issues found. Configure MiMo API for full analysis.',
     findings,
     categories: {
       reentrancy: sourceCode.includes('.call{value:') ? 7 : 2,

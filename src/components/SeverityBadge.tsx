@@ -10,7 +10,7 @@ export default function SeverityBadge({ severity }: { severity: string }) {
   const c = config[severity] || config.info
 
   return (
-    <span className={\`${c.bg} ${c.text} ${c.border} border px-2.5 py-0.5 rounded-full text-xs font-semibold uppercase tracking-wider\`}>
+    <span className={`${c.bg} ${c.text} ${c.border} border px-2.5 py-0.5 rounded-full text-xs font-semibold uppercase tracking-wider`}>
       {severity}
     </span>
   )

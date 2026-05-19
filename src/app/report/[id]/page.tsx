@@ -7,6 +7,15 @@ import CategoryBar from '@/components/CategoryBar'
 import FindingCard from '@/components/FindingCard'
 import LoadingState from '@/components/LoadingState'
 
+interface Finding {
+  id: string
+  severity: string
+  title: string
+  description: string
+  line?: string
+  recommendation: string
+}
+
 interface Report {
   id: string
   createdAt: string
@@ -21,7 +30,7 @@ interface Report {
     score: number
     riskLevel: string
     summary: string
-    findings: any[]
+    findings: Finding[]
     categories: Record<string, number>
     recommendation: string
     modelUsed: string
@@ -36,7 +45,7 @@ export default function ReportPage() {
   useEffect(() => {
     const fetchReport = async () => {
       try {
-        const res = await fetch(`/api/report/${params.id}`)
+        const res = await fetch('/api/report/' + params.id)
         if (!res.ok) throw new Error('Report not found')
         const data = await res.json()
         setReport(data)
@@ -50,10 +59,10 @@ export default function ReportPage() {
   if (error) {
     return (
       <div className="py-20 text-center">
-        <div className="text-5xl mb-4">❌</div>
+        <div className="text-5xl mb-4">X</div>
         <h2 className="text-2xl font-bold text-dark-100 mb-2">Report Not Found</h2>
         <p className="text-dark-400 mb-6">{error}</p>
-        <a href="/" className="btn-primary">← Back to Auditor</a>
+        <a href="/" className="btn-primary">Back to Auditor</a>
       </div>
     )
   }
@@ -79,17 +88,16 @@ export default function ReportPage() {
     'DO NOT DEPLOY': 'border-red-500/30 bg-red-500/5 text-red-300',
   }
 
-  const severityCounts = audit.findings.reduce((acc: Record<string, number>, f: any) => {
+  const severityCounts = audit.findings.reduce((acc: Record<string, number>, f: Finding) => {
     acc[f.severity] = (acc[f.severity] || 0) + 1
     return acc
-  }, {})
+  }, {} as Record<string, number>)
 
   return (
     <div className="py-8 sm:py-12">
-      {/* Header */}
       <div className="mb-8">
         <a href="/" className="text-dark-500 hover:text-dark-300 text-sm mb-4 inline-flex items-center gap-1 transition-colors">
-          ← Back to Auditor
+          Back to Auditor
         </a>
         
         <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
@@ -99,9 +107,9 @@ export default function ReportPage() {
             </h1>
             <div className="flex flex-wrap items-center gap-2 text-sm">
               <span className="text-dark-400">{contract.chain}</span>
-              <span className="text-dark-600">•</span>
+              <span className="text-dark-600">|</span>
               <span className="font-mono text-dark-500">{contract.address.slice(0, 8)}...{contract.address.slice(-6)}</span>
-              <span className="text-dark-600">•</span>
+              <span className="text-dark-600">|</span>
               <span className="text-dark-500">{contract.compiler}</span>
             </div>
           </div>
@@ -115,9 +123,7 @@ export default function ReportPage() {
         </div>
       </div>
 
-      {/* Main grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-        {/* Score */}
         <div className="glass-card p-8 flex flex-col items-center justify-center lg:col-span-1">
           <h2 className="text-sm font-medium text-dark-400 mb-4 uppercase tracking-wider">Safety Score</h2>
           <ScoreRing score={audit.score} />
@@ -126,7 +132,6 @@ export default function ReportPage() {
           </div>
         </div>
 
-        {/* Summary + Recommendation */}
         <div className="glass-card p-6 lg:col-span-2 flex flex-col gap-5">
           <div>
             <h2 className="text-sm font-medium text-dark-400 uppercase tracking-wider mb-3">Executive Summary</h2>
@@ -160,7 +165,6 @@ export default function ReportPage() {
         </div>
       </div>
 
-      {/* Category Risk Breakdown */}
       <div className="glass-card p-6 mb-8">
         <h2 className="text-sm font-medium text-dark-400 uppercase tracking-wider mb-5">Risk Category Breakdown</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -170,21 +174,19 @@ export default function ReportPage() {
         </div>
       </div>
 
-      {/* Detailed Findings */}
       {audit.findings.length > 0 && (
         <div className="mb-8">
           <h2 className="text-sm font-medium text-dark-400 uppercase tracking-wider mb-5">
             Detailed Findings ({audit.findings.length})
           </h2>
           <div className="space-y-4">
-            {audit.findings.map((finding: any, index: number) => (
+            {audit.findings.map((finding: Finding, index: number) => (
               <FindingCard key={finding.id} finding={finding} index={index} />
             ))}
           </div>
         </div>
       )}
 
-      {/* Footer info */}
       <div className="glass-card p-5 flex flex-col sm:flex-row items-center justify-between gap-3 text-sm text-dark-500">
         <span>Model: {audit.modelUsed}</span>
         <span>Chain: {contract.chain} ({contract.explorer})</span>
@@ -194,7 +196,7 @@ export default function ReportPage() {
           rel="noopener noreferrer"
           className="text-mimo-400 hover:text-mimo-300 transition-colors"
         >
-          View on Explorer ↗
+          View on Explorer
         </a>
       </div>
     </div>

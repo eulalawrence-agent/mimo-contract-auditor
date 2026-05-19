@@ -5,13 +5,13 @@ import { useRouter } from 'next/navigation'
 import LoadingState from '@/components/LoadingState'
 
 const CHAINS = [
-  { id: 'ethereum', name: 'Ethereum', icon: '⟠' },
-  { id: 'bsc', name: 'BSC', icon: '⬢' },
-  { id: 'polygon', name: 'Polygon', icon: '⬡' },
-  { id: 'arbitrum', name: 'Arbitrum', icon: '🔵' },
-  { id: 'optimism', name: 'Optimism', icon: '🔴' },
-  { id: 'base', name: 'Base', icon: '🔷' },
-  { id: 'avalanche', name: 'Avalanche', icon: '🔺' },
+  { id: 'ethereum', name: 'Ethereum', icon: 'E' },
+  { id: 'bsc', name: 'BSC', icon: 'B' },
+  { id: 'polygon', name: 'Polygon', icon: 'P' },
+  { id: 'arbitrum', name: 'Arbitrum', icon: 'A' },
+  { id: 'optimism', name: 'Optimism', icon: 'O' },
+  { id: 'base', name: 'Base', icon: 'L' },
+  { id: 'avalanche', name: 'Avalanche', icon: 'V' },
 ]
 
 const EXAMPLES = [
@@ -34,7 +34,7 @@ export default function Home() {
       return
     }
     if (!/^0x[a-fA-F0-9]{40}$/.test(address.trim())) {
-      setError('Invalid address format. Must be 0x followed by 40 hex characters.')
+      setError('Invalid address format.')
       return
     }
 
@@ -43,7 +43,6 @@ export default function Home() {
     setStep('Fetching contract source code...')
 
     try {
-      // Small delay for UX
       await new Promise(r => setTimeout(r, 500))
       setStep('Analyzing with MiMo AI...')
 
@@ -61,7 +60,7 @@ export default function Home() {
 
       setStep('Report generated!')
       await new Promise(r => setTimeout(r, 500))
-      router.push(`/report/${data.reportId}`)
+      router.push('/report/' + data.reportId)
     } catch (err: any) {
       setError(err.message)
       setLoading(false)
@@ -74,7 +73,6 @@ export default function Home() {
 
   return (
     <div className="py-12 sm:py-20">
-      {/* Hero */}
       <div className="text-center mb-16 animate-in">
         <div className="inline-flex items-center gap-2 bg-mimo-500/10 border border-mimo-500/20 rounded-full px-4 py-1.5 mb-6">
           <span className="w-2 h-2 rounded-full bg-mimo-400 animate-pulse" />
@@ -88,15 +86,13 @@ export default function Home() {
         </h1>
         
         <p className="text-dark-400 text-lg max-w-2xl mx-auto leading-relaxed">
-          AI-powered vulnerability detection for Solidity contracts. 
+          AI-powered vulnerability detection for Solidity contracts.
           Paste any contract address and get a comprehensive security report in seconds.
         </p>
       </div>
 
-      {/* Input Card */}
       <div className="max-w-2xl mx-auto animate-in stagger-1 opacity-0">
         <div className="glass-card p-6 sm:p-8">
-          {/* Chain selector */}
           <div className="mb-5">
             <label className="block text-sm font-medium text-dark-300 mb-2.5">Blockchain Network</label>
             <div className="flex flex-wrap gap-2">
@@ -110,14 +106,12 @@ export default function Home() {
                       : 'bg-dark-800/50 text-dark-400 border border-dark-700/50 hover:border-dark-600'
                   }`}
                 >
-                  <span className="mr-1.5">{c.icon}</span>
                   {c.name}
                 </button>
               ))}
             </div>
           </div>
 
-          {/* Address input */}
           <div className="mb-5">
             <label className="block text-sm font-medium text-dark-300 mb-2.5">Contract Address</label>
             <input
@@ -130,19 +124,17 @@ export default function Home() {
             />
             {error && (
               <p className="mt-2 text-sm text-red-400 flex items-center gap-1.5">
-                <span>⚠️</span> {error}
+                {error}
               </p>
             )}
           </div>
 
-          {/* Submit */}
           <button onClick={handleAnalyze} className="btn-primary w-full text-lg py-4">
-            🔍 Analyze Contract
+            Analyze Contract
           </button>
         </div>
       </div>
 
-      {/* Example contracts */}
       <div className="max-w-2xl mx-auto mt-8 animate-in stagger-2 opacity-0">
         <p className="text-dark-500 text-sm mb-3">Try these examples:</p>
         <div className="space-y-2">
@@ -157,26 +149,29 @@ export default function Home() {
                 <span className="text-dark-500 text-xs font-mono ml-2">{ex.address.slice(0, 10)}...{ex.address.slice(-8)}</span>
               </div>
               <span className="text-dark-500 text-xs group-hover:text-mimo-400 transition-colors">
-                Click to try →
+                Click to try
               </span>
             </button>
           ))}
         </div>
       </div>
 
-      {/* Features */}
       <div className="max-w-4xl mx-auto mt-20 grid grid-cols-1 sm:grid-cols-3 gap-6 animate-in stagger-3 opacity-0">
-        {[
-          { icon: '🤖', title: 'MiMo AI Analysis', desc: 'Advanced reasoning detects complex vulnerability patterns that static analyzers miss.' },
-          { icon: '⚡', title: 'Instant Results', desc: 'Full security report generated in under 30 seconds. No signup required.' },
-          { icon: '🔗', title: 'Multi-Chain', desc: 'Supports Ethereum, BSC, Polygon, Arbitrum, Optimism, Base, and Avalanche.' },
-        ].map(f => (
-          <div key={f.title} className="glass-card-hover p-6 text-center">
-            <div className="text-3xl mb-3">{f.icon}</div>
-            <h3 className="font-semibold text-dark-100 mb-2">{f.title}</h3>
-            <p className="text-dark-400 text-sm leading-relaxed">{f.desc}</p>
-          </div>
-        ))}
+        <div className="glass-card-hover p-6 text-center">
+          <div className="text-3xl mb-3">AI</div>
+          <h3 className="font-semibold text-dark-100 mb-2">MiMo AI Analysis</h3>
+          <p className="text-dark-400 text-sm leading-relaxed">Advanced reasoning detects complex vulnerability patterns that static analyzers miss.</p>
+        </div>
+        <div className="glass-card-hover p-6 text-center">
+          <div className="text-3xl mb-3">⚡</div>
+          <h3 className="font-semibold text-dark-100 mb-2">Instant Results</h3>
+          <p className="text-dark-400 text-sm leading-relaxed">Full security report generated in under 30 seconds. No signup required.</p>
+        </div>
+        <div className="glass-card-hover p-6 text-center">
+          <div className="text-3xl mb-3">🔗</div>
+          <h3 className="font-semibold text-dark-100 mb-2">Multi-Chain</h3>
+          <p className="text-dark-400 text-sm leading-relaxed">Supports Ethereum, BSC, Polygon, Arbitrum, Optimism, Base, and Avalanche.</p>
+        </div>
       </div>
     </div>
   )
