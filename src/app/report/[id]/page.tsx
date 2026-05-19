@@ -43,17 +43,30 @@ export default function ReportPage() {
   const [error, setError] = useState('')
 
   useEffect(() => {
-    const fetchReport = async () => {
-      try {
-        const res = await fetch('/api/report/' + params.id)
-        if (!res.ok) throw new Error('Report not found')
-        const data = await res.json()
-        setReport(data)
-      } catch (err: any) {
-        setError(err.message)
+    const id = params.id as string
+
+    // Try localStorage first
+    try {
+      const stored = localStorage.getItem('mimo_report_' + id)
+      if (stored) {
+        setReport(JSON.parse(stored))
+        return
       }
-    }
-    fetchReport()
+    } catch {}
+
+    // Fallback: try API (won't work on serverless, but just in case)
+    fetch('/api/report/' + id)
+      .then(res => res.ok ? res.json() : null)
+      .then(data => {
+        if (data && data.id) {
+          setReport(data)
+        } else {
+          setError('Report not found. It may have expired or was generated in a different session.')
+        }
+      })
+      .catch(() => {
+        setError('Report not found.')
+      })
   }, [params.id])
 
   if (error) {
@@ -113,13 +126,11 @@ export default function ReportPage() {
               <span className="text-dark-500">{contract.compiler}</span>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-dark-500">
-              {new Date(report.createdAt).toLocaleDateString('en-US', { 
-                year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' 
-              })}
-            </span>
-          </div>
+          <span className="text-xs text-dark-500">
+            {new Date(report.createdAt).toLocaleDateString('en-US', { 
+              year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' 
+            })}
+          </span>
         </div>
       </div>
 

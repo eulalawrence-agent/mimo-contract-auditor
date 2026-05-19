@@ -1,4 +1,5 @@
-const reports = new Map<string, StoredReport>()
+// Client-side storage via localStorage
+// Reports are stored on the client, not on the server
 
 export interface StoredReport {
   id: string
@@ -14,13 +15,22 @@ export interface StoredReport {
 }
 
 export function saveReport(report: StoredReport): string {
-  const id = report.id
-  reports.set(id, report)
-  return id
+  if (typeof window !== 'undefined') {
+    try {
+      localStorage.setItem('report_' + report.id, JSON.stringify(report))
+    } catch {}
+  }
+  return report.id
 }
 
 export function getReport(id: string): StoredReport | undefined {
-  return reports.get(id)
+  if (typeof window !== 'undefined') {
+    try {
+      const data = localStorage.getItem('report_' + id)
+      if (data) return JSON.parse(data)
+    } catch {}
+  }
+  return undefined
 }
 
 export function generateId(): string {

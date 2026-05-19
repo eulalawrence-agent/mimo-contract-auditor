@@ -5,13 +5,13 @@ import { useRouter } from 'next/navigation'
 import LoadingState from '@/components/LoadingState'
 
 const CHAINS = [
-  { id: 'ethereum', name: 'Ethereum', icon: 'E' },
-  { id: 'bsc', name: 'BSC', icon: 'B' },
-  { id: 'polygon', name: 'Polygon', icon: 'P' },
-  { id: 'arbitrum', name: 'Arbitrum', icon: 'A' },
-  { id: 'optimism', name: 'Optimism', icon: 'O' },
-  { id: 'base', name: 'Base', icon: 'L' },
-  { id: 'avalanche', name: 'Avalanche', icon: 'V' },
+  { id: 'ethereum', name: 'Ethereum' },
+  { id: 'bsc', name: 'BSC' },
+  { id: 'polygon', name: 'Polygon' },
+  { id: 'arbitrum', name: 'Arbitrum' },
+  { id: 'optimism', name: 'Optimism' },
+  { id: 'base', name: 'Base' },
+  { id: 'avalanche', name: 'Avalanche' },
 ]
 
 const EXAMPLES = [
@@ -58,9 +58,15 @@ export default function Home() {
         throw new Error(data.error || 'Analysis failed')
       }
 
+      // Store report in localStorage
+      const reportId = data.reportId
+      try {
+        localStorage.setItem('mimo_report_' + reportId, JSON.stringify(data.report))
+      } catch {}
+
       setStep('Report generated!')
       await new Promise(r => setTimeout(r, 500))
-      router.push('/report/' + data.reportId)
+      router.push('/report/' + reportId)
     } catch (err: any) {
       setError(err.message)
       setLoading(false)
@@ -123,9 +129,7 @@ export default function Home() {
               onKeyDown={e => e.key === 'Enter' && handleAnalyze()}
             />
             {error && (
-              <p className="mt-2 text-sm text-red-400 flex items-center gap-1.5">
-                {error}
-              </p>
+              <p className="mt-2 text-sm text-red-400">{error}</p>
             )}
           </div>
 
@@ -163,12 +167,12 @@ export default function Home() {
           <p className="text-dark-400 text-sm leading-relaxed">Advanced reasoning detects complex vulnerability patterns that static analyzers miss.</p>
         </div>
         <div className="glass-card-hover p-6 text-center">
-          <div className="text-3xl mb-3">⚡</div>
+          <div className="text-3xl mb-3">Fast</div>
           <h3 className="font-semibold text-dark-100 mb-2">Instant Results</h3>
           <p className="text-dark-400 text-sm leading-relaxed">Full security report generated in under 30 seconds. No signup required.</p>
         </div>
         <div className="glass-card-hover p-6 text-center">
-          <div className="text-3xl mb-3">🔗</div>
+          <div className="text-3xl mb-3">Multi</div>
           <h3 className="font-semibold text-dark-100 mb-2">Multi-Chain</h3>
           <p className="text-dark-400 text-sm leading-relaxed">Supports Ethereum, BSC, Polygon, Arbitrum, Optimism, Base, and Avalanche.</p>
         </div>

@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { fetchContractSource, getSupportedChains } from '@/lib/etherscan'
 import { analyzeContract } from '@/lib/mimo'
-import { saveReport, generateId } from '@/lib/reports'
 
 export const maxDuration = 60
 
@@ -31,27 +30,23 @@ export async function POST(req: NextRequest) {
       contractSource.chain
     )
 
-    const reportId = generateId()
-    const report = {
-      id: reportId,
-      createdAt: new Date().toISOString(),
-      contract: {
-        address: contractSource.address,
-        name: contractSource.contractName,
-        chain: contractSource.chain,
-        compiler: contractSource.compilerVersion,
-        explorer: contractSource.explorer,
-      },
-      audit: auditResult,
-    }
-
-    saveReport(report)
+    const reportId = Math.random().toString(36).slice(2, 10) + Date.now().toString(36)
 
     return NextResponse.json({
       success: true,
       reportId,
-      contract: report.contract,
-      audit: auditResult,
+      report: {
+        id: reportId,
+        createdAt: new Date().toISOString(),
+        contract: {
+          address: contractSource.address,
+          name: contractSource.contractName,
+          chain: contractSource.chain,
+          compiler: contractSource.compilerVersion,
+          explorer: contractSource.explorer,
+        },
+        audit: auditResult,
+      },
     })
   } catch (error: any) {
     console.error('Analysis error:', error)
@@ -67,6 +62,5 @@ export async function GET() {
     name: 'MiMo Contract Auditor API',
     version: '1.0.0',
     supportedChains: getSupportedChains(),
-    usage: 'POST { address: "0x...", chain: "ethereum" }',
   })
 }
